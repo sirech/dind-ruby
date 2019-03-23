@@ -43,11 +43,12 @@ RUN mkdir -p /usr/local/etc \
   echo 'update: --no-document'; \
   } >> /usr/local/etc/gemrc
 
-ENV RUBY_MAJOR 2.5
-ENV RUBY_VERSION 2.5.1
-ENV RUBY_DOWNLOAD_SHA256 886ac5eed41e3b5fc699be837b0087a6a5a3d10f464087560d2d21b3e71b754d
-ENV RUBYGEMS_VERSION 2.7.6
-ENV BUNDLER_VERSION 1.16.1
+ENV RUBY_MAJOR 2.6
+ENV RUBY_VERSION 2.6.1
+# Found in https://github.com/postmodern/ruby-versions/blob/master/ruby/checksums.sha256
+ENV RUBY_DOWNLOAD_SHA256 47b629808e9fd44ce1f760cdf3ed14875fc9b19d4f334e82e2cf25cb2898f2f2
+ENV RUBYGEMS_VERSION 3.0.1
+ENV BUNDLER_VERSION 1.17.2
 
 # some of ruby's build scripts are written in ruby
 #   we purge system ruby later to make sure our final image uses what we just built

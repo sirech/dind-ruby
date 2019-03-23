@@ -1,14 +1,14 @@
 #!/bin/bash
 
 export IMAGE_NAME=${IMAGE_NAME:-'dind-ruby'}
-export TAG=2.5.1
+export TAG=2.6.1
 
 goal_build() {
-  docker build . -t "${IMAGE_NAME}:${TAG}"
+  docker build . -t "${IMAGE_NAME}"
 }
 
 goal_test() {
-  received=$(docker run --privileged --rm -it "${IMAGE_NAME}:${TAG}" sh -c "ruby -v")
+  received=$(docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "ruby -v")
   if [[ $received =~ .*$TAG.* ]]; then
     exit 0
   else
@@ -18,6 +18,7 @@ goal_test() {
 }
 
 goal_publish() {
+  docker tag "${IMAGE_NAME}" "${TAG}"
   docker push "${IMAGE_NAME}:${TAG}"
 }
 
