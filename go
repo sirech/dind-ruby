@@ -18,7 +18,7 @@ goal_test() {
 }
 
 goal_publish() {
-  docker tag "${IMAGE_NAME}" "${TAG}"
+  docker tag "${IMAGE_NAME}" "${IMAGE_NAME}:${TAG}"
   docker push "${IMAGE_NAME}:${TAG}"
 }
 
