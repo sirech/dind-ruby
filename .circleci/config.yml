@@ -1,13 +1,15 @@
 version: 2
 jobs:
   build:
-    environment:
-      IMAGE_NAME: $DOCKER_USER/dind-ruby
-
     docker:
       - image: circleci/buildpack-deps:stretch
 
     steps:
+      - run:
+          name: Setup variables
+          command: |
+            echo 'export IMAGE_NAME=$DOCKER_USER/dind-ruby' >> $BASH_ENV
+
       - checkout
       - setup_remote_docker
       - run: ./go build
