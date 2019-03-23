@@ -17,6 +17,10 @@ goal_test() {
   fi
 }
 
+goal_publish() {
+  docker push "${IMAGE_NAME}:${TAG}"
+}
+
 goal_help() {
   echo "usage: $0 <goal>
 
@@ -24,6 +28,7 @@ goal_help() {
 
     build                    -- Build the image
     test                     -- Test that the image is built correctly
+    publish                  -- Publish the image to the hub
     "
   exit 1
 }

@@ -1,0 +1,16 @@
+version: 2
+jobs:
+  build:
+    environment:
+      IMAGE_NAME: $DOCKER_USER/dind-ruby
+
+    docker:
+      - image: circleci/buildpack-deps:stretch
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: ./go build
+      - run: ./go test
+      - run: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+      - run: ./go publish
