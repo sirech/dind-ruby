@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export IMAGE_NAME=${IMAGE_NAME:-'dind-ruby'}
-export TAG=2.6.1
+export TAG=2.6.3
 
 goal_build() {
   docker build . -t "${IMAGE_NAME}"

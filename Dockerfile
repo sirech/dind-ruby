@@ -44,9 +44,9 @@ RUN mkdir -p /usr/local/etc \
   } >> /usr/local/etc/gemrc
 
 ENV RUBY_MAJOR 2.6
-ENV RUBY_VERSION 2.6.1
-# Found in https://github.com/postmodern/ruby-versions/blob/master/ruby/checksums.sha256
-ENV RUBY_DOWNLOAD_SHA256 47b629808e9fd44ce1f760cdf3ed14875fc9b19d4f334e82e2cf25cb2898f2f2
+ENV RUBY_VERSION 2.6.3
+# Found in https://github.com/postmodern/ruby-versions/blob/master/ruby/checksums.sha256 for tar.xz
+ENV RUBY_DOWNLOAD_SHA256 11a83f85c03d3f0fc9b8a9b6cad1b2674f26c5aaa43ba858d4b0fcc2b54171e1
 ENV RUBYGEMS_VERSION 3.0.1
 ENV BUNDLER_VERSION 1.17.2
 
