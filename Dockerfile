@@ -47,7 +47,7 @@ ENV RUBY_MAJOR 2.7
 ENV RUBY_VERSION 2.7.1
 # Found in https://github.com/postmodern/ruby-versions/blob/master/ruby/checksums.sha256 for tar.xz
 ENV RUBY_DOWNLOAD_SHA256 b224f9844646cc92765df8288a46838511c1cec5b550d8874bd4686a904fcee7
-ENV RUBYGEMS_VERSION 3.0.1
+ENV RUBYGEMS_VERSION 3.2.4
 ENV BUNDLER_VERSION 2.1.4
 
 # some of ruby's build scripts are written in ruby

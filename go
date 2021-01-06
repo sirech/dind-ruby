@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -e
+set -o nounset
+set -o pipefail
+
 export IMAGE_NAME=${IMAGE_NAME:-'dind-ruby'}
 export TAG=2.7.1
 
@@ -8,6 +12,9 @@ goal_build() {
 }
 
 goal_test() {
+  # check for "deadlock; recursive locking (ThreadError)"
+  docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "irb -v" > /dev/null
+
   received=$(docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "ruby -v")
   if [[ $received =~ .*$TAG.* ]]; then
     exit 0
