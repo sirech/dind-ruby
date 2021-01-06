@@ -15,6 +15,10 @@ goal_test() {
   # check for "deadlock; recursive locking (ThreadError)"
   docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "irb -v" > /dev/null
 
+  docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "docker -v" > /dev/null
+
+  docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "docker-compose -v" > /dev/null
+
   received=$(docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "ruby -v")
   if [[ $received =~ .*$TAG.* ]]; then
     exit 0

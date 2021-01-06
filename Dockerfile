@@ -9,10 +9,6 @@ RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases
   ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
   ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
   apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
-  apk add --no-cache python py-pip && \
-  pip install --upgrade --no-cache-dir pip && \
-  pip install --no-cache-dir awscli && \
-  apk --purge del py-pip && \
   wget -q -O "/etc/apk/keys/sgerrand.rsa.pub" "https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub" && \
   wget -q \
   "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
@@ -149,3 +145,8 @@ RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
   && chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
 
 # End docker/ruby contents
+
+# docker-compose
+RUN apk add --no-cache python3 python3-dev py3-pip libffi-dev openssl-dev gcc libc-dev make && \
+  pip3 install --no-cache-dir docker-compose && \
+  apk --purge del py3-pip
