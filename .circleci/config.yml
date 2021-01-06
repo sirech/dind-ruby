@@ -14,5 +14,13 @@ jobs:
       - setup_remote_docker
       - run: ./go build
       - run: ./go test
-      - run: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+      - run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
       - run: ./go publish
+      - run: TAG=latest ./go publish
+
+workflows:
+  version: 2
+  pipeline:
+    jobs:
+      - build:
+          context: docker-context
