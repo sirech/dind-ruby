@@ -76,6 +76,8 @@ RUN set -ex \
   procps \
   readline-dev \
   ruby \
+  git \
+  g++ \
   tar \
   xz \
   yaml-dev \
