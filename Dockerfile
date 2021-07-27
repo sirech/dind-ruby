@@ -1,4 +1,4 @@
-FROM docker:edge-dind
+FROM docker:dind
 
 RUN addgroup -g 2999 docker
 
@@ -149,6 +149,9 @@ RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 # End docker/ruby contents
 
 # docker-compose
-RUN apk add --no-cache python3 python3-dev py3-pip libffi-dev openssl-dev gcc libc-dev make && \
-  pip3 install --no-cache-dir docker-compose && \
+RUN apk -U upgrade && \
+  apk add --no-cache python3 python3-dev py3-pip libffi-dev openssl-dev gcc libc-dev make rust cargo && \
+  pip3 uninstall docker docker-py && \
+  pip3 install --upgrade pip && \
+  pip3 install --no-cache-dir docker-compose requests && \
   apk --purge del py3-pip
