@@ -77,6 +77,7 @@ RUN set -ex \
   readline-dev \
   ruby \
   git \
+  g++ \
   tar \
   xz \
   yaml-dev \
