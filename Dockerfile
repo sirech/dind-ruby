@@ -153,5 +153,4 @@ RUN apk -U upgrade && \
   apk add --no-cache python3 python3-dev py3-pip libffi-dev openssl-dev gcc libc-dev make rust cargo && \
   pip3 uninstall docker docker-py && \
   pip3 install --upgrade pip && \
-  pip3 install --no-cache-dir docker-compose requests && \
-  apk --purge del py3-pip
+  pip3 install --no-cache-dir docker-compose requests
