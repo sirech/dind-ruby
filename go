@@ -19,6 +19,8 @@ goal_test() {
 
   docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "docker-compose -v" > /dev/null
 
+  docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "git -v" > /dev/null
+
   received=$(docker run --privileged --rm -it "${IMAGE_NAME}" sh -c "ruby -v")
   if [[ $received =~ .*$TAG.* ]]; then
     exit 0
