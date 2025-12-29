@@ -1,156 +1,178 @@
 FROM docker:dind
 
-RUN addgroup -g 2999 docker
+RUN getent group docker || addgroup -g 2999 docker
 
 # From https://hub.docker.com/r/frolvlad/alpine-glibc/
-RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
-  ALPINE_GLIBC_PACKAGE_VERSION="2.25-r0" && \
-  ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-  ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-  ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-  apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
-  wget -q -O "/etc/apk/keys/sgerrand.rsa.pub" "https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub" && \
-  wget -q \
-  "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-  "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-  "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
-  apk add --no-cache \
-  "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-  "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-  "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
-  \
-  rm "/etc/apk/keys/sgerrand.rsa.pub" && \
-  /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 C.UTF-8 || true && \
-  echo "export LANG=C.UTF-8" > /etc/profile.d/locale.sh && \
-  \
-  apk del glibc-i18n && \
-  \
-  rm "/root/.wget-hsts" && \
-  apk del .build-dependencies && \
-  rm \
-  "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-  "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-  "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
+# RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
+#   ALPINE_GLIBC_PACKAGE_VERSION="2.25-r0" && \
+#   ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+#   ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+#   ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+#   apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
+#   wget -q -O "/etc/apk/keys/sgerrand.rsa.pub" "https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub" && \
+#   wget -q \
+#   "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+#   "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+#   "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+#   apk add --no-cache \
+#   "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+#   "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+#   "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+#   \
+#   rm "/etc/apk/keys/sgerrand.rsa.pub" && \
+#   /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 C.UTF-8 || true && \
+#   echo "export LANG=C.UTF-8" > /etc/profile.d/locale.sh && \
+#   \
+#   apk del glibc-i18n && \
+#   \
+#   rm "/root/.wget-hsts" && \
+#   apk del .build-dependencies && \
+#   rm \
+#   "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+#   "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+#   "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
 
-# The following is from docker/ruby, https://github.com/docker-library/ruby
-RUN mkdir -p /usr/local/etc \
-  && { \
-  echo 'install: --no-document'; \
-  echo 'update: --no-document'; \
-  } >> /usr/local/etc/gemrc
+## /START DOCKER RUBY
+## Taken from https://github.com/docker-library/ruby/blob/master/3.2/alpine3.22/Dockerfile
 
-ENV RUBY_MAJOR 2.7
-ENV RUBY_VERSION 2.7.1
-# Found in https://github.com/postmodern/ruby-versions/blob/master/ruby/checksums.sha256 for tar.xz
-ENV RUBY_DOWNLOAD_SHA256 b224f9844646cc92765df8288a46838511c1cec5b550d8874bd4686a904fcee7
-ENV RUBYGEMS_VERSION 3.2.4
-ENV BUNDLER_VERSION 2.1.4
+# skip installing gem documentation with `gem install`/`gem update`
+RUN set -eux; \
+	mkdir -p /usr/local/etc; \
+	echo 'gem: --no-document' >> /usr/local/etc/gemrc
+
+ENV LANG C.UTF-8
+
+# https://www.ruby-lang.org/en/news/2025/07/24/ruby-3-2-9-released/
+ENV RUBY_VERSION 3.2.9
+ENV RUBY_DOWNLOAD_URL https://cache.ruby-lang.org/pub/ruby/3.2/ruby-3.2.9.tar.xz
+ENV RUBY_DOWNLOAD_SHA256 cf6699d0084c588e7944d92e1a8edda28b1cc3ee471a1f0aebb4b3d32c9753b2
 
 # some of ruby's build scripts are written in ruby
 #   we purge system ruby later to make sure our final image uses what we just built
-# readline-dev vs libedit-dev: https://bugs.ruby-lang.org/issues/11869 and https://github.com/docker-library/ruby/issues/75
-# hadolint ignore=DL3003,DL3019,DL4006,SC2086
-RUN set -ex \
-  \
-  && apk add --no-cache --virtual .ruby-builddeps \
-  bash \
-  autoconf \
-  bison \
-  bzip2 \
-  bzip2-dev \
-  ca-certificates \
-  coreutils \
-  dpkg-dev dpkg \
-  gcc \
-  gdbm-dev \
-  glib-dev \
-  libc-dev \
-  libffi-dev \
-  openssl \
-  openssl-dev \
-  libxml2-dev \
-  libxslt-dev \
-  linux-headers \
-  make \
-  ncurses-dev \
-  procps \
-  readline-dev \
-  ruby \
-  git \
-  g++ \
-  tar \
-  xz \
-  yaml-dev \
-  zlib-dev \
-  \
-  && wget -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz" \
-  && echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum -c - \
-  \
-  && mkdir -p /usr/src/ruby \
-  && tar -xJf ruby.tar.xz -C /usr/src/ruby --strip-components=1 \
-  && rm ruby.tar.xz \
-  \
-  && cd /usr/src/ruby \
-  \
-  # hack in "ENABLE_PATH_CHECK" disabling to suppress:
-  #   warning: Insecure world writable dir
-  && { \
-  echo '#define ENABLE_PATH_CHECK 0'; \
-  echo; \
-  cat file.c; \
-  } > file.c.new \
-  && mv file.c.new file.c \
-  \
-  && autoconf \
-  && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
-  # the configure script does not detect isnan/isinf as macros
-  && export ac_cv_func_isnan=yes ac_cv_func_isinf=yes \
-  && ./configure \
-  --build="$gnuArch" \
-  --disable-install-doc \
-  --enable-shared \
-  && make -j "$(nproc)" \
-  && make install \
-  \
-  && runDeps="$( \
-  scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
-  | tr ',' '\n' \
-  | sort -u \
-  | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-  )" \
-  && apk add --virtual .ruby-rundeps $runDeps \
-  bzip2 \
-  ca-certificates \
-  libffi-dev \
-  openssl-dev \
-  procps \
-  yaml-dev \
-  zlib-dev \
-  # WARNING: This is commented so that we can build gems ourselves later
-  # && apk del .ruby-builddeps \
-  && cd / \
-  && rm -r /usr/src/ruby \
-  \
-  && gem update --system "$RUBYGEMS_VERSION" \
-  && gem install bundler --version "$BUNDLER_VERSION" --force \
-  && rm -r /root/.gem/
+RUN set -eux; \
+	\
+	apk add --no-cache --virtual .ruby-builddeps \
+		autoconf \
+		bison \
+		bzip2 \
+		bzip2-dev \
+		ca-certificates \
+		coreutils \
+		dpkg-dev dpkg \
+		g++ \
+		gcc \
+		gdbm-dev \
+		glib-dev \
+		gmp-dev \
+		libc-dev \
+		libffi-dev \
+		libxml2-dev \
+		libxslt-dev \
+		linux-headers \
+		make \
+		ncurses-dev \
+		openssl \
+		openssl-dev \
+		patch \
+		procps \
+		yaml-dev \
+		zlib-dev \
+		readline-dev \
+		ruby \
+		tar \
+		xz \
+		yaml-dev \
+		zlib-dev \
+	; \
+	\
+	rustArch=; \
+	apkArch="$(apk --print-arch)"; \
+	case "$apkArch" in \
+		'x86_64') rustArch='x86_64-unknown-linux-musl'; rustupUrl='https://static.rust-lang.org/rustup/archive/1.28.2/x86_64-unknown-linux-musl/rustup-init'; rustupSha256='e6599a1c7be58a2d8eaca66a80e0dc006d87bbcf780a58b7343d6e14c1605cb2' ;; \
+		'aarch64') rustArch='aarch64-unknown-linux-musl'; rustupUrl='https://static.rust-lang.org/rustup/archive/1.28.2/aarch64-unknown-linux-musl/rustup-init'; rustupSha256='a97c8f56d7462908695348dd8c71ea6740c138ce303715793a690503a94fc9a9' ;; \
+	esac; \
+	\
+	if [ -n "$rustArch" ]; then \
+		mkdir -p /tmp/rust; \
+		\
+		wget -O /tmp/rust/rustup-init "$rustupUrl"; \
+		echo "$rustupSha256 */tmp/rust/rustup-init" | sha256sum --check --strict; \
+		chmod +x /tmp/rust/rustup-init; \
+		\
+		export RUSTUP_HOME='/tmp/rust/rustup' CARGO_HOME='/tmp/rust/cargo'; \
+		export PATH="$CARGO_HOME/bin:$PATH"; \
+		/tmp/rust/rustup-init -y --no-modify-path --profile minimal --default-toolchain '1.91.1' --default-host "$rustArch"; \
+		\
+		rustc --version; \
+		cargo --version; \
+	fi; \
+	\
+	wget -O ruby.tar.xz "$RUBY_DOWNLOAD_URL"; \
+	echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum --check --strict; \
+	\
+	mkdir -p /usr/src/ruby; \
+	tar -xJf ruby.tar.xz -C /usr/src/ruby --strip-components=1; \
+	rm ruby.tar.xz; \
+	\
+	cd /usr/src/ruby; \
+	\
+# https://github.com/docker-library/ruby/issues/196
+# https://bugs.ruby-lang.org/issues/14387#note-13 (patch source)
+# https://bugs.ruby-lang.org/issues/14387#note-16 ("Therefore ncopa's patch looks good for me in general." -- only breaks glibc which doesn't matter here)
+	wget -O 'thread-stack-fix.patch' 'https://bugs.ruby-lang.org/attachments/download/7081/0001-thread_pthread.c-make-get_main_stack-portable-on-lin.patch'; \
+	echo '3ab628a51d92fdf0d2b5835e93564857aea73e0c1de00313864a94a6255cb645 *thread-stack-fix.patch' | sha256sum --check --strict; \
+	patch -p1 -i thread-stack-fix.patch; \
+	rm thread-stack-fix.patch; \
+	\
+	autoconf; \
+	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
+	./configure \
+		--build="$gnuArch" \
+		--disable-install-doc \
+		--enable-shared \
+		${rustArch:+--enable-yjit} \
+	; \
+	make -j "$(nproc)"; \
+	make install; \
+	\
+	rm -rf /tmp/rust; \
+	runDeps="$( \
+		scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
+			| tr ',' '\n' \
+			| sort -u \
+			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+	)"; \
+	apk add --no-network --virtual .ruby-rundeps $runDeps; \
+	apk del --no-network .ruby-builddeps; \
+	\
+	cd /; \
+	rm -r /usr/src/ruby; \
+# verify we have no "ruby" packages installed
+	if \
+		apk --no-network list --installed \
+			| grep -v '^[.]ruby-' \
+			| grep -i ruby \
+	; then \
+		exit 1; \
+	fi; \
+	[ "$(command -v ruby)" = '/usr/local/bin/ruby' ]; \
+# rough smoke test
+	ruby --version; \
+	gem --version; \
+	bundle --version
 
-# install things globally, for great justice
-# and don't create ".bundle" in all our apps
+# don't create ".bundle" in all our apps
 ENV GEM_HOME /usr/local/bundle
-ENV BUNDLE_PATH="$GEM_HOME" \
-  BUNDLE_BIN="$GEM_HOME/bin" \
-  BUNDLE_SILENCE_ROOT_WARNING=1 \
-  BUNDLE_APP_CONFIG="$GEM_HOME"
-ENV PATH $BUNDLE_BIN:$PATH
-RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
-  && chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
+ENV BUNDLE_SILENCE_ROOT_WARNING=1 \
+	BUNDLE_APP_CONFIG="$GEM_HOME"
+ENV PATH $GEM_HOME/bin:$PATH
+RUN set -eux; \
+	mkdir "$GEM_HOME"; \
+# adjust permissions of GEM_HOME for running "gem install" as an arbitrary user
+	chmod 1777 "$GEM_HOME"
 
-# End docker/ruby contents
+## /END DOCKER Ruby
 
 # docker-compose
 RUN apk -U upgrade && \
-  apk add --no-cache python3 python3-dev py3-pip libffi-dev openssl-dev gcc libc-dev make rust cargo && \
-  pip3 uninstall docker docker-py && \
-  pip3 install --upgrade pip && \
-  pip3 install --no-cache-dir docker-compose requests
+  apk add --no-cache python3 python3-dev py3-pip libffi-dev openssl-dev gcc libc-dev make rust cargo docker-compose

@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 export IMAGE_NAME=${IMAGE_NAME:-'dind-ruby'}
-export TAG=2.7.1
+export TAG=3.2.9
 
 goal_build() {
   docker build . -t "${IMAGE_NAME}"
