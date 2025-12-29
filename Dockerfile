@@ -2,36 +2,6 @@ FROM docker:dind
 
 RUN getent group docker || addgroup -g 2999 docker
 
-# From https://hub.docker.com/r/frolvlad/alpine-glibc/
-# RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
-#   ALPINE_GLIBC_PACKAGE_VERSION="2.25-r0" && \
-#   ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-#   ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-#   ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
-#   apk add --no-cache --virtual=.build-dependencies wget ca-certificates && \
-#   wget -q -O "/etc/apk/keys/sgerrand.rsa.pub" "https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub" && \
-#   wget -q \
-#   "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-#   "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-#   "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
-#   apk add --no-cache \
-#   "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-#   "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-#   "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
-#   \
-#   rm "/etc/apk/keys/sgerrand.rsa.pub" && \
-#   /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 C.UTF-8 || true && \
-#   echo "export LANG=C.UTF-8" > /etc/profile.d/locale.sh && \
-#   \
-#   apk del glibc-i18n && \
-#   \
-#   rm "/root/.wget-hsts" && \
-#   apk del .build-dependencies && \
-#   rm \
-#   "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
-#   "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
-#   "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
-
 ## /START DOCKER RUBY
 ## Taken from https://github.com/docker-library/ruby/blob/master/3.2/alpine3.22/Dockerfile
 
@@ -172,6 +142,11 @@ RUN set -eux; \
 	chmod 1777 "$GEM_HOME"
 
 ## /END DOCKER Ruby
+
+## libraries required to bundle rails applications
+RUN set -eux; \
+	\
+	apk add --no-cache yaml yaml-dev
 
 # docker-compose
 RUN apk -U upgrade && \
